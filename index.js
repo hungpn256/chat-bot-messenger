@@ -27,38 +27,41 @@ app.get("/webhook", function (req, res) {
 });
 // Đoạn code xử lý khi có người nhắn tin cho bot
 app.post("/webhook", function (req, res) {
-  var entries = req.body.entry;
-  for (var entry of entries) {
-    var messaging = entry.messaging;
-    for (var message of messaging) {
-      var senderId = message.sender.id;
-      if (message.message) {
-        // Nếu người dùng gửi tin nhắn đến
-        if (message.message.text) {
-          var text = message.message.text;
-          if (text == "hi" || text == "hello") {
-            sendMessage(senderId, "Trung Quân's Bot: " + "Xin Chào");
-          } else {
-            sendMessage(
-              senderId,
-              "Trung Quân's Bot: " +
-                "Xin lỗi, câu hỏi của bạn chưa có trong hệ thống, chúng tôi sẽ cập nhật sớm nhất."
-            );
+  try {
+    var entries = req.body.entry;
+    console.log("🚀 ~ file: index.js:31 ~ entries:", entries);
+    for (var entry of entries) {
+      var messaging = entry.messaging;
+      for (var message of messaging) {
+        var senderId = message.sender.id;
+        console.log("🚀 ~ file: index.js:37 ~ senderId:", senderId);
+        if (message.message) {
+          // Nếu người dùng gửi tin nhắn đến
+          if (message.message.text) {
+            var text = message.message.text;
+            if (text == "hi" || text == "hello") {
+              sendMessage(senderId, "Trung Quân's Bot: " + "Xin Chào");
+            } else {
+              sendMessage(
+                senderId,
+                "Trung Quân's Bot: " +
+                  "Xin lỗi, câu hỏi của bạn chưa có trong hệ thống, chúng tôi sẽ cập nhật sớm nhất."
+              );
+            }
           }
         }
       }
     }
+    res.status(200).send("OK");
+  } catch (err) {
+    res.status(400);
+    console.log(err);
   }
-  res.status(200).send("OK");
 });
 // Gửi thông tin tới REST API để Bot tự trả lời
 function sendMessage(senderId, message) {
-  request({
-    url: "https://graph.facebook.com/v2.6/me/messages",
-    qs: {
-      access_token:
-        "EAAHiYnzzFcwBO5c2RRbDlSgPYIg5R0JMZAP70KDCAD9oHFEQm9I9RVZCG5Gyvpg6mZCxbTdDryFuEVgPbaZAbKQJCJhYeyK8PQbhpd1zhRsGjBlZBPm8FQOdjJQBBR5BmVBOLFV52cFYtiFw3ewOJLu9vnIGrlkoGmGwCzHDZAoSygaYOxrFOqdIG1P9mdZBlrM",
-    },
+  fetch({
+    url: "https://graph.facebook.com/v2.6/me/messages?access_token=EAAHiYnzzFcwBO5c2RRbDlSgPYIg5R0JMZAP70KDCAD9oHFEQm9I9RVZCG5Gyvpg6mZCxbTdDryFuEVgPbaZAbKQJCJhYeyK8PQbhpd1zhRsGjBlZBPm8FQOdjJQBBR5BmVBOLFV52cFYtiFw3ewOJLu9vnIGrlkoGmGwCzHDZAoSygaYOxrFOqdIG1P9mdZBlrM",
     method: "POST",
     json: {
       recipient: {
