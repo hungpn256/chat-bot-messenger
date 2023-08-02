@@ -6,6 +6,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import request from "request";
 import fetch from "node-fetch";
+
 var app = express();
 app.use(logger("dev"));
 app.use(bodyParser.json());
@@ -60,16 +61,18 @@ app.post("/webhook", function (req, res) {
 });
 // Gửi thông tin tới REST API để Bot tự trả lời
 function sendMessage(senderId, message) {
-  fetch({
-    url: "https://graph.facebook.com/v2.6/me/messages?access_token=EAAHiYnzzFcwBO5c2RRbDlSgPYIg5R0JMZAP70KDCAD9oHFEQm9I9RVZCG5Gyvpg6mZCxbTdDryFuEVgPbaZAbKQJCJhYeyK8PQbhpd1zhRsGjBlZBPm8FQOdjJQBBR5BmVBOLFV52cFYtiFw3ewOJLu9vnIGrlkoGmGwCzHDZAoSygaYOxrFOqdIG1P9mdZBlrM",
-    method: "POST",
-    json: {
-      recipient: {
-        id: senderId,
+  fetch(
+    "https://graph.facebook.com/v2.6/me/messages?access_token=EAAHiYnzzFcwBO5c2RRbDlSgPYIg5R0JMZAP70KDCAD9oHFEQm9I9RVZCG5Gyvpg6mZCxbTdDryFuEVgPbaZAbKQJCJhYeyK8PQbhpd1zhRsGjBlZBPm8FQOdjJQBBR5BmVBOLFV52cFYtiFw3ewOJLu9vnIGrlkoGmGwCzHDZAoSygaYOxrFOqdIG1P9mdZBlrM",
+    {
+      method: "POST",
+      body: {
+        recipient: {
+          id: senderId,
+        },
+        message: {
+          text: message,
+        },
       },
-      message: {
-        text: message,
-      },
-    },
-  });
+    }
+  );
 }
