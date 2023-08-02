@@ -4,9 +4,7 @@ import logger from "morgan";
 import http from "http";
 import bodyParser from "body-parser";
 import express from "express";
-import request from "request";
-import fetch from "node-fetch";
-
+import axios from "axios";
 var app = express();
 app.use(logger("dev"));
 app.use(bodyParser.json());
@@ -17,7 +15,7 @@ app.use(
 );
 var server = http.createServer(app);
 app.listen(process.env.PORT || 3000);
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   res.send("Server chạy ngon lành.");
 });
 app.get("/webhook", function (req, res) {
@@ -61,17 +59,15 @@ app.post("/webhook", function (req, res) {
 });
 // Gửi thông tin tới REST API để Bot tự trả lời
 function sendMessage(senderId, message) {
-  fetch(
+  return axios.post(
     "https://graph.facebook.com/v2.6/me/messages?access_token=EAAHiYnzzFcwBO5c2RRbDlSgPYIg5R0JMZAP70KDCAD9oHFEQm9I9RVZCG5Gyvpg6mZCxbTdDryFuEVgPbaZAbKQJCJhYeyK8PQbhpd1zhRsGjBlZBPm8FQOdjJQBBR5BmVBOLFV52cFYtiFw3ewOJLu9vnIGrlkoGmGwCzHDZAoSygaYOxrFOqdIG1P9mdZBlrM",
     {
-      method: "POST",
-      body: {
-        recipient: {
-          id: senderId,
-        },
-        message: {
-          text: message,
-        },
+      recipient: {
+        id: senderId,
+      },
+      messaging_type: "RESPONSE",
+      message: {
+        text: message,
       },
     }
   );
