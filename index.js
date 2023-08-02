@@ -1,12 +1,11 @@
 // # SimpleServer
 // A simple chat bot server
-var logger = require("morgan");
-var http = require("http");
-var bodyParser = require("body-parser");
-var express = require("express");
-var request = require("request");
-var fetch = require("node-fetch");
-var router = express();
+import logger from "morgan";
+import http from "http";
+import bodyParser from "body-parser";
+import express from "express";
+import request from "request";
+import fetch from "node-fetch";
 var app = express();
 app.use(logger("dev"));
 app.use(bodyParser.json());
