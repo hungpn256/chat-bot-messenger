@@ -5,6 +5,7 @@ var http = require("http");
 var bodyParser = require("body-parser");
 var express = require("express");
 var request = require("request");
+var fetch = require("node-fetch");
 var router = express();
 var app = express();
 app.use(logger("dev"));
@@ -21,9 +22,9 @@ app.get("/", (req, res) => {
 });
 app.get("/webhook", function (req, res) {
   if (req.query["hub.verify_token"] === "hung") {
-    res.send(req.query["hub.challenge"]);
+    return res.send(req.query["hub.challenge"]);
   }
-  res.send("Error, wrong validation token");
+  return res.send("Error, wrong validation token");
 });
 // Đoạn code xử lý khi có người nhắn tin cho bot
 app.post("/webhook", function (req, res) {
