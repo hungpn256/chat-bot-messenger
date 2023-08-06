@@ -27,7 +27,7 @@ app.get("/webhook", function (req, res) {
 const timeoutFindPartner = {};
 const yourPartner = {};
 const partnerPending = new Set();
-// Đoạn code xử lý khi có người nhắn tin cho bot
+
 app.post("/webhook", async (req, res) => {
   try {
     var entries = req.body.entry;
@@ -36,6 +36,7 @@ app.post("/webhook", async (req, res) => {
       var messaging = entry.messaging;
       for (var message of messaging) {
         var senderId = message.sender.id;
+        console.log("🚀 ~ file: index.js:39 ~ app.post ~ senderId:", senderId);
         if (message.message) {
           // Nếu người dùng gửi tin nhắn đến
           if (message.message.text) {
@@ -45,7 +46,7 @@ app.post("/webhook", async (req, res) => {
             } else {
               if (text == "Bắt đầu") {
                 if (timeoutFindPartner[senderId]) {
-                  sendMessage(senderId, "Chờ một chút nha...");
+                  await sendMessage(senderId, "Chờ một chút nha...");
                   return;
                 } else {
                   timeoutFindPartner[senderId] = setTimeout(async () => {
@@ -67,10 +68,11 @@ app.post("/webhook", async (req, res) => {
                     yourPartner[senderId] = partnerId;
                   } else {
                     partnerPending.add(senderId);
+                    await sendMessage(senderId, "Chờ một chút nha...");
                   }
                 }
               } else {
-                sendMessage(
+                await sendMessage(
                   senderId,
                   "Trung Quân's Bot: " +
                     "Xin lỗi, câu hỏi của bạn chưa có trong hệ thống, chúng tôi sẽ cập nhật sớm nhất."
@@ -83,8 +85,8 @@ app.post("/webhook", async (req, res) => {
     }
     res.status(200).send("OK");
   } catch (err) {
-    res.status(400);
     console.log(err);
+    res.status(400);
   }
 });
 // Gửi thông tin tới REST API để Bot tự trả lời
