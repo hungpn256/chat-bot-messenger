@@ -24,8 +24,11 @@ app.get("/webhook", function (req, res) {
   }
   return res.send("Error, wrong validation token");
 });
+const timeoutFindPartner = {};
+const yourPartner = {};
+const partnerPending = new Set();
 // Đoạn code xử lý khi có người nhắn tin cho bot
-app.post("/webhook", function (req, res) {
+app.post("/webhook", async (req, res) => {
   try {
     var entries = req.body.entry;
     console.log("🚀 ~ file: index.js:31 ~ entries:", entries);
@@ -33,19 +36,46 @@ app.post("/webhook", function (req, res) {
       var messaging = entry.messaging;
       for (var message of messaging) {
         var senderId = message.sender.id;
-        console.log("🚀 ~ file: index.js:37 ~ senderId:", senderId);
         if (message.message) {
           // Nếu người dùng gửi tin nhắn đến
           if (message.message.text) {
             var text = message.message.text;
-            if (text == "hi" || text == "hello") {
-              sendMessage(senderId, "Trung Quân's Bot: " + "Xin Chào");
+            if (yourPartner[senderId]) {
+              sendMessage(yourPartner[senderId], text);
             } else {
-              sendMessage(
-                senderId,
-                "Trung Quân's Bot: " +
-                  "Xin lỗi, câu hỏi của bạn chưa có trong hệ thống, chúng tôi sẽ cập nhật sớm nhất."
-              );
+              if (text == "Bắt đầu") {
+                if (timeoutFindPartner[senderId]) {
+                  sendMessage(senderId, "Chờ một chút nha...");
+                  return;
+                } else {
+                  timeoutFindPartner[senderId] = setTimeout(async () => {
+                    await sendMessage(
+                      senderId,
+                      "Hiện tại không có ai phù hợp để kết nối. Thử lại sau"
+                    );
+                    partnerPending.delete(senderId);
+                    timeoutFindPartner[senderId] = undefined;
+                  }, 60000);
+                  if (partnerPending.length > 0) {
+                    clearTimeout(timeoutFindPartner[senderId]);
+                    const partnerId = partnerPending.shift();
+                    await Promise.all([
+                      sendMessage(senderId, "Đã kết nối"),
+                      sendMessage(partnerId, "Đã kết nối"),
+                    ]);
+                    yourPartner[partnerId] = senderId;
+                    yourPartner[senderId] = partnerId;
+                  } else {
+                    partnerPending.add(senderId);
+                  }
+                }
+              } else {
+                sendMessage(
+                  senderId,
+                  "Trung Quân's Bot: " +
+                    "Xin lỗi, câu hỏi của bạn chưa có trong hệ thống, chúng tôi sẽ cập nhật sớm nhất."
+                );
+              }
             }
           }
         }
